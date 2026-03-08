@@ -81,6 +81,7 @@ We use three different specifications for the loss function:
 |----------|-----------|-----------|-----------|
 | MSE  | 0.0005   | 0.0004   | 0.0003  |
 | MAPE  | 7.80%   | 514.98%   | 262.05%   |
+| log(MSE)  | 0.0687   | 0.3957   | 0.4680   |
 
 ---
 
