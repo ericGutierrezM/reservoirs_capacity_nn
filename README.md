@@ -5,6 +5,8 @@
 
 This repository contains the end-to-end pipeline for predicting hydrological volumes from Sentinel-2 MSI data using a custom Convolutional Neural Network.
 
+See the full report [here](https://ericgutierrezm.github.io/reservoirs_capacity_nn/).
+
 ## 1. Environment Setup
 This project uses uv for high-performance dependency management and reproducible environments.
 

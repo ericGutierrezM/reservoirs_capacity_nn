@@ -194,7 +194,7 @@ c-10,0,-16.667,5,-20,15z M188 15 H145 v585 v1200 v585 h43z"/></svg></span></span
 <h2 id="results">Results</h2>
 <p>In Table 1, we show the train and validation loss, as well as the early-stopping epoch, for each fold and loss model. The results highlight a stark contrast in training dynamics between the two loss functions, with the Log-MSE model requiring an average of nearly 40 epochs to converge, whereas the optimized MAPE model stabilized significantly faster at an average of just 15 epochs. By penalizing relative percentage errors rather than absolute squared errors, the MAPE formulation prevented the network from obsessively over-optimizing for the largest reservoirs, allowing it to rapidly extract generalized topographical rules without memorizing specific valley geometries.</p>
 <p>Furthermore, the consistent trend of validation losses remaining lower than or comparable to training losses across the folds demonstrates that the cross-validation strategy successfully mitigated spatial overfitting. Ultimately, the MAPE architecture achieved a global mean validation error of 28.4% on completely unseen basins.</p>
-<table style="width=100%">
+<table>
   <thead>
     <tr>
       <th rowspan="2">Left-Out Reservoir</th>
