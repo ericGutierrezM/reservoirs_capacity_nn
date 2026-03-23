@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Predicting Water Volume in Reservoirs using Satellite Imagery in Catalonia</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+body {
+  margin-left: 15vw;
+  margin-right: 15vw;
+  font-size: 2.5vh;
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <h1 id="predicting-water-volume-in-reservoirs-using-satellite-imagery-in-catalonia">Predicting Water Volume in Reservoirs using Satellite Imagery in Catalonia</h1>
+<h4>Computational Learning and Deep Learning. Barcelona School of Economics.</h4>
+<blockquote>
+<p>Eric Gutiérrez, March 2026.</p>
+</blockquote>
+<h2 id="motivation">Motivation</h2>
+<p>Climate change, through the many externalities it brings, poses a serious threat to societies around the globe. Beyond the causes of this global phenomenon and the potential mitigation measures that could be taken, governments and organizations worldwide are focusing on resilience and adaptability. In our case, we are interested in how to better inform public policy in the realm of water management, and how having reliable data is key to effectively planning and acting towards resilience.</p>
+<p>Specifically, we aim to provide a Computer Vision model that predicts water reservoir volumes using satellite imagery. This mission is relevant not only for &quot;data-poor&quot; environments, where official measurements are non-existent, but also for &quot;data-rich&quot; environments, where a remote-sensing solution could provide valuable redundancy. Additionally, it could serve as a fact-checking mechanism for official records, an application of great relevance today amid threats to democracy and increasing citizen mistrust of public institutions.</p>
+<h2 id="data">Data</h2>
+<p>The dataset integrates <a href="https://dataspace.copernicus.eu/">Sentinel-2 multispectral imagery</a> with <a href="https://analisi.transparenciacatalunya.cat/Medi-Ambient/Quantitat-d-aigua-als-embassaments-de-les-Conques-/gn9e-3qhr/about_data">daily volumetric records</a> (<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><msup><mi>m</mi><mn>3</mn></msup></mrow><annotation encoding="application/x-tex">hm^3</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord mathnormal">h</span><span class="mord"><span class="mord mathnormal">m</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span></span></span></span></span></span></span></span>) from the Agència Catalana de l’Aigua (ACA) for nine Catalan reservoirs over the 2016–2026 period. To standardize inputs across varying basin sizes, a dynamic window generator was developed to convert kilometer-based windows into decimal degrees, ensuring all data was retrieved at a fixed 20m/pixel resolution via the Copernicus Data Space Ecosystem (CDSE) API. Observations were strictly filtered for <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>≤</mo><mn>15</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">\le 15\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7719em;vertical-align:-0.136em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">15%</span></span></span></span> cloud cover, and the Normalized Difference Water Index (NDWI) was computed server-side to isolate surface water signatures using the formula:</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>N</mi><mi>D</mi><mi>W</mi><mi>I</mi><mo>=</mo><mfrac><mrow><mi>B</mi><mn>03</mn><mo>−</mo><mi>B</mi><mn>08</mn></mrow><mrow><mi>B</mi><mn>03</mn><mo>+</mo><mi>B</mi><mn>08</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">NDWI = \dfrac{B03 - B08}{B03 + B08}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="mord mathnormal" style="margin-right:0.02778em;">D</span><span class="mord mathnormal" style="margin-right:0.13889em;">W</span><span class="mord mathnormal" style="margin-right:0.07847em;">I</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.1297em;vertical-align:-0.7693em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3603em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="mord">03</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="mord">08</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="mord">03</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="mord">08</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.7693em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span></p>
+<p>For model training, a custom dataset class was implemented to transform raw GeoTIFFs into model-ready tensors through a rigorous pre-processing pipeline. The class reclassifies NaNs as <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>−</mo><mn>1.0</mn></mrow><annotation encoding="application/x-tex">-1.0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">−</span><span class="mord">1.0</span></span></span></span> (representing dry land) and clips spectral values to a <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mo>−</mo><mn>1.0</mn><mo separator="true">,</mo><mn>1.0</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[-1.0, 1.0]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">−</span><span class="mord">1.0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">1.0</span><span class="mclose">]</span></span></span></span> range before zero-padding all inputs to a uniform 500x500 spatial tensor. Furthermore, the dataset supports dual label-scaling modes to facilitate different optimization strategies: a logarithmic <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>log</mi><mo>⁡</mo><mo stretchy="false">(</mo><mi>V</mi><mo>+</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(V + 1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.22222em;">V</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">)</span></span></span></span> transformation for Log-MSE experiments and a linear <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mi mathvariant="normal">/</mi><mn>300</mn></mrow><annotation encoding="application/x-tex">1/300</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1/300</span></span></span></span> scaling factor to normalize volumes for MAPE training. This architecture ensures spatial consistency and numerical stability across the entire multi-reservoir ensemble.</p>
+<blockquote>
+<p>Please refer to the notebooks <code>get_sentinel-2.ipynb</code> and <code>get_labels.ipynb</code> for the source code regarding the downloading/processing of Sentinel-2 data and the matching of ground-truth labels, respectively. For the implementation of the custom dataset, please refer to the notebook <code>cnn_loocv.ipynb</code>.</p>
+</blockquote>
+<h2 id="methodology">Methodology</h2>
+<h3 id="architecture">Architecture</h3>
+<p>To accurately predict reservoir volumes from satellite imagery, the model must be capable of understanding the 2D topographical footprint and morphological features of the water bodies. Standard Multi-Layer Perceptrons (MLPs) inherently flatten spatial inputs, destroying the geometric relationships between neighboring pixels. To overcome this limitation, a custom Convolutional Neural Network (CNN) architecture, denoted as DamCNN, was designed to sequentially extract localized spatial features from the Normalized Difference Water Index (NDWI) matrices before performing continuous regression.</p>
+<p>The network is structured into three distinct phases: a hierarchical feature extractor, a spatial pooling bottleneck, and a fully connected regression head.</p>
+<h4 id="hierarchical-feature-extraction">Hierarchical Feature Extraction</h4>
+<p>The input to the network is a standardized, zero-padded NDWI tensor with dimensions of 1x500x500. The feature extraction phase consists of four sequential convolutional blocks. Each block applies a 2D Convolutional layer with a 3x3 kernel and a padding of 1 to preserve spatial dimensions, followed immediately by a non-linear ReLU activation function. To progressively downsample the spatial resolution while increasing the depth of the feature maps, a 2x2 Max Pooling layer (with a stride of 2) concludes each block. Through this sequence, the network expands its feature channels from 1 to 16, 32, 64, and finally 128, while compressing the spatial dimensions from 500x500 down to a 31x31 feature map.</p>
+<h4 id="global-average-pooling">Global Average Pooling</h4>
+<p>A critical challenge in training a CNN on varied reservoir shapes is preventing the network from memorizing the absolute spatial location of water pixels within the 500x500 grid. To enforce spatial invariance and prevent overfitting to specific valley coordinates, an Adaptive Global Average Pooling layer (1x1) is applied after the final convolutional block. This operation collapses the 128 feature maps of 31x31 pixels into exactly 128 spatially-agnostic numeric representations. This forces the model to base its predictions on the presence and shape of topological features, rather than their explicit location in the frame.</p>
+<h4 id="regression-head">Regression Head</h4>
+<p>The resulting 128-dimensional vector is flattened and passed into a fully connected feed-forward regression head. The first linear layer maps the 128 features to a hidden layer of 256 neurons, activated by a ReLU function to model complex non-linear relationships. Finally, a concluding linear layer outputs a single continuous value, representing the predicted volume of the reservoir.</p>
+<h3 id="leave-one-reservoir-out-cross-validation">Leave-One-Reservoir-Out Cross-Validation</h3>
+<p>Standard random-split cross-validation suffers from severe data leakage when applied to spatio-temporal remote sensing datasets. If satellite images of the same reservoir from different dates appear in both the training and validation sets, the model is highly susceptible to temporal autocorrelation. Under these conditions, the network tends to memorize the static background pixels of a specific valley rather than learning the underlying geometric relationship between the water's surface area and its true volume.</p>
+<p>To rigorously evaluate the model's spatial generalization capabilities and prove generalization to unseen topographies, a Leave-One-Reservoir-Out Cross-Validation strategy was implemented. The dataset comprises 9 distinct reservoirs. In each of the 9 folds, a new model instance is initialized and trained entirely on the chronological imagery of the other 8 reservoirs. The model is then validated exclusively on the completely unseen 9th reservoir. This strict spatial boundary guarantees that the validation metrics reflect genuine topographical learning rather than spatial memorization.</p>
+<p>To ensure the training process was continuously monitored and to strictly prevent overfitting, the network was explicitly evaluated on the left-out validation set at the conclusion of every epoch. Because the geometric complexity and difficulty of generalization vary significantly depending on which specific reservoir is left out, setting a fixed number of training epochs would inevitably cause some folds to underfit and others to overfit.</p>
+<p>To address this, a dynamic Early Stopping mechanism was integrated into the training loop. During each epoch, the validation error was tracked. If the model's performance on the unseen validation reservoir failed to improve for 15 consecutive epochs (a patience of 15), training was automatically halted. The model weights from the optimal epoch were then restored and saved.</p>
+<h3 id="hyperparameter-tuning-and-loss-function-optimization">Hyperparameter Tuning and Loss Function Optimization</h3>
+<p>A fundamental challenge in training a global regression model for hydrological monitoring is the extreme variance in reservoir capacities. The dataset contains basins with drastically different maximum volumes, ranging from relatively small local dams (e.g., <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>∼</mo><mn>10</mn><mtext> </mtext><mi>h</mi><msup><mi>m</mi><mn>3</mn></msup></mrow><annotation encoding="application/x-tex">\sim 10 \ hm^3</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.3669em;"></span><span class="mrel">∼</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord">10</span><span class="mspace"> </span><span class="mord mathnormal">h</span><span class="mord"><span class="mord mathnormal">m</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span></span></span></span></span></span></span></span>) to massive regional reservoirs (e.g., <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>&gt;</mo><mn>130</mn><mtext> </mtext><mi>h</mi><msup><mi>m</mi><mn>3</mn></msup></mrow><annotation encoding="application/x-tex">&gt;130 \ hm^3</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5782em;vertical-align:-0.0391em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord">130</span><span class="mspace"> </span><span class="mord mathnormal">h</span><span class="mord"><span class="mord mathnormal">m</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span></span></span></span></span></span></span></span>). Consequently, the selection of an appropriate loss function and target scaling mechanism was treated as a primary hyperparameter.</p>
+<p>Initially, to handle this massive scale discrepancy, the target volume labels were log-transformed (<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>l</mi><mi>o</mi><mi>g</mi><mo stretchy="false">(</mo><mi>V</mi><mo>+</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">log(V + 1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mord mathnormal">o</span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.22222em;">V</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">)</span></span></span></span>), and the network was trained using Mean Squared Error in the logarithmic space (Log-MSE). While this transformation successfully compressed the target distribution and prevented the network from disproportionately prioritizing the largest reservoirs, it introduced a critical vulnerability during inference. Optimizing in the logarithmic space meant that even minor prediction errors made by the network were exponentially magnified when the outputs were mathematically reversed back into physical cubic hectometers (<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><msup><mi>m</mi><mn>3</mn></msup></mrow><annotation encoding="application/x-tex">hm^3</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord mathnormal">h</span><span class="mord"><span class="mord mathnormal">m</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span></span></span></span></span></span></span></span>). This led to unstable and heavily skewed volume predictions when testing on out-of-distribution topographies.</p>
+<p>To achieve scale invariance and resolve this extrapolation bias, we transitioned to Mean Absolute Percentage Error (MAPE), defined as:</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>M</mi><mi>A</mi><mi>P</mi><mi>E</mi><mo>=</mo><mfrac><mn>1</mn><mi>N</mi></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><mrow><mo fence="true">∣</mo><mfrac><mrow><msub><mi>y</mi><mi>i</mi></msub><mo>−</mo><msub><mover accent="true"><mi>y</mi><mo>^</mo></mover><mi>i</mi></msub></mrow><mrow><msub><mi>y</mi><mi>i</mi></msub><mo>+</mo><mi>ϵ</mi></mrow></mfrac><mo fence="true">∣</mo></mrow></mrow><annotation encoding="application/x-tex">MAPE = \frac{1}{N} \sum_{i=1}^{N} \left| \frac{y_i - \hat{y}_i}{y_i + \epsilon} \right|
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">M</span><span class="mord mathnormal">A</span><span class="mord mathnormal" style="margin-right:0.05764em;">PE</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:3.106em;vertical-align:-1.2777em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3214em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.10903em;">N</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.8283em;"><span style="top:-1.8723em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mrel mtight">=</span><span class="mord mtight">1</span></span></span></span><span style="top:-3.05em;"><span class="pstrut" style="height:3.05em;"></span><span><span class="mop op-symbol large-op">∑</span></span></span><span style="top:-4.3em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.10903em;">N</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.2777em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner"><span class="mopen"><span class="delimsizing mult"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.45em;"><span style="top:-3.45em;"><span class="pstrut" style="height:4.4em;"></span><span style="width:0.333em;height:2.400em;"><svg xmlns="http://www.w3.org/2000/svg" width="0.333em" height="2.400em" viewBox="0 0 333 2400"><path d="M145 15 v585 v1200 v585 c2.667,10,9.667,15,21,15
+c10,0,16.667,-5,20,-15 v-585 v-1200 v-585 c-2.667,-10,-9.667,-15,-21,-15
+c-10,0,-16.667,5,-20,15z M188 15 H145 v585 v1200 v585 h43z"/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.95em;"><span></span></span></span></span></span></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3714em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord mathnormal">ϵ</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord"><span class="mord accent"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1944em;"><span class="mord">^</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1944em;"><span></span></span></span></span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.8804em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mclose"><span class="delimsizing mult"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.45em;"><span style="top:-3.45em;"><span class="pstrut" style="height:4.4em;"></span><span style="width:0.333em;height:2.400em;"><svg xmlns="http://www.w3.org/2000/svg" width="0.333em" height="2.400em" viewBox="0 0 333 2400"><path d="M145 15 v585 v1200 v585 c2.667,10,9.667,15,21,15
+c10,0,16.667,-5,20,-15 v-585 v-1200 v-585 c-2.667,-10,-9.667,-15,-21,-15
+c-10,0,-16.667,5,-20,15z M188 15 H145 v585 v1200 v585 h43z"/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.95em;"><span></span></span></span></span></span></span></span></span></span></span></span></p>
+<p>where <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">y_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> represents the true volume, <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover accent="true"><mi>y</mi><mo>^</mo></mover><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">\hat{y}_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord accent"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1944em;"><span class="mord">^</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1944em;"><span></span></span></span></span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> represents the predicted volume, <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span></span></span></span> is the batch size, and <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ϵ</mi></mrow><annotation encoding="application/x-tex">\epsilon</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">ϵ</span></span></span></span> is a strictly positive constant (<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mo>×</mo><msup><mn>10</mn><mrow><mo>−</mo><mn>8</mn></mrow></msup></mrow><annotation encoding="application/x-tex">1 \times 10^{-8}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord">1</span><span class="mord"><span class="mord">0</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">8</span></span></span></span></span></span></span></span></span></span></span></span>) applied to prevent division by zero. By normalizing the absolute error by the true volume, MAPE forces the Convolutional Neural Network to evaluate performance on a relative scale. Under this paradigm, a 10% error is weighted equally regardless of whether the physical reservoir holds <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>10</mn><mtext> </mtext><mi>h</mi><msup><mi>m</mi><mn>3</mn></msup></mrow><annotation encoding="application/x-tex">10 \ hm^3</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord">10</span><span class="mspace"> </span><span class="mord mathnormal">h</span><span class="mord"><span class="mord mathnormal">m</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span></span></span></span></span></span></span></span> or <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>100</mn><mtext> </mtext><mi>h</mi><msup><mi>m</mi><mn>3</mn></msup></mrow><annotation encoding="application/x-tex">100 \ hm^3</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord">100</span><span class="mspace"> </span><span class="mord mathnormal">h</span><span class="mord"><span class="mord mathnormal">m</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span></span></span></span></span></span></span></span>, forcing the model to learn generalized topographical relationships rather than simply defaulting to large numeric outputs.</p>
+<p>To facilitate stable gradient descent across these complex loss landscapes, the network weights were updated using the Adam optimizer with a learning rate of 0.001. A batch size of 32 was deliberately selected; this provided a sufficient sample of varied topographies per forward pass to maintain stable gradient updates, while strictly adhering to the GPU memory constraints required to process high-resolution 1x500x500 spatial tensors.</p>
+<blockquote>
+<p>Please refer to the notebook <code>cnn_loocv.ipynb</code> for the source code regarding this section.</p>
+</blockquote>
+<h2 id="results">Results</h2>
+<p>In Table 1, we show the train and validation loss, as well as the early-stopping epoch, for each fold and loss model. The results highlight a stark contrast in training dynamics between the two loss functions, with the Log-MSE model requiring an average of nearly 40 epochs to converge, whereas the optimized MAPE model stabilized significantly faster at an average of just 15 epochs. By penalizing relative percentage errors rather than absolute squared errors, the MAPE formulation prevented the network from obsessively over-optimizing for the largest reservoirs, allowing it to rapidly extract generalized topographical rules without memorizing specific valley geometries.</p>
+<p>Furthermore, the consistent trend of validation losses remaining lower than or comparable to training losses across the folds demonstrates that the cross-validation strategy successfully mitigated spatial overfitting. Ultimately, the MAPE architecture achieved a global mean validation error of 28.4% on completely unseen basins.</p>
+<table style="width=100%">
+  <thead>
+    <tr>
+      <th rowspan="2">Left-Out Reservoir</th>
+      <th colspan="3" style="text-align: center">Log-MSE Model</th>
+      <th colspan="3" style="text-align: center">MAPE Model</th>
+    </tr>
+    <tr>
+      <th>Train Loss</th>
+      <th>Val Loss</th>
+      <th>Epoch</th>
+      <th>Train Loss</th>
+      <th>Val Loss</th>
+      <th>Epoch</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Baells</strong></td>
+      <td>0.1227</td><td>0.1326</td><td>19</td>
+      <td>0.3503</td><td>0.1374</td><td>25</td>
+    </tr>
+    <tr>
+      <td><strong>Boadella</strong></td>
+      <td>0.0996</td><td>0.0544</td><td>31</td>
+      <td>1.3986</td><td>0.3506</td><td>1</td>
+    </tr>
+    <tr>
+      <td><strong>Foix</strong></td>
+      <td>0.3777</td><td>0.0319</td><td>3</td>
+      <td>0.4570</td><td>0.4113</td><td>13</td>
+    </tr>
+    <tr>
+      <td><strong>Llosa de Cavall</strong></td>
+      <td>0.0366</td><td>0.0260</td><td>99</td>
+      <td>0.3085</td><td>0.1677</td><td>18</td>
+    </tr>
+    <tr>
+      <td><strong>Riudecanyes</strong></td>
+      <td>0.0742</td><td>0.0704</td><td>47</td>
+      <td>0.4928</td><td>0.5191</td><td>3</td>
+    </tr>
+    <tr>
+      <td><strong>Sant Ponç</strong></td>
+      <td>0.0695</td><td>0.0172</td><td>45</td>
+      <td>0.5458</td><td>0.1611</td><td>9</td>
+    </tr>
+    <tr>
+      <td><strong>Sau</strong></td>
+      <td>0.0995</td><td>0.1277</td><td>24</td>
+      <td>0.2585</td><td>0.1880</td><td>32</td>
+    </tr>
+    <tr>
+      <td><strong>Siurana</strong></td>
+      <td>0.0821</td><td>0.1702</td><td>40</td>
+      <td>0.4791</td><td>0.3814</td><td>14</td>
+    </tr>
+    <tr>
+      <td><strong>Susqueda</strong></td>
+      <td>0.0624</td><td>0.0494</td><td>51</td>
+      <td>0.3185</td><td>0.2393</td><td>21</td>
+    </tr>
+    <tr>
+      <td><strong>Global Mean</strong></td>
+      <td><strong>0.1138</strong></td><td><strong>0.0755</strong></td><td><strong>39.89</strong></td>
+      <td><strong>0.5121</strong></td><td><strong>0.2840</strong></td><td><strong>15.11</strong></td>
+    </tr>
+  </tbody>
+</table>
+<p><u>Table 1</u>.
+In-Distribution Performance Metrics for Leave-One-Reservoir-Out Cross-Validation. The table presents the final training loss, validation loss, and the specific epoch at which the dynamic Early Stopping mechanism (patience = 15) halted training for each left-out reservoir fold. Results are provided for both the initial Log-MSE model and the optimized MAPE model. Note: Log-MSE and MAPE represent the native optimization metrics used during training and operate on fundamentally different mathematical scales (logarithmic absolute error vs. relative percentage error); therefore, their raw loss values are not directly comparable to one another.</p>
+<h3 id="test-on-unseen-reservoirs">Test on Unseen Reservoirs</h3>
+<p>To rigorously validate the models's generalization against out-of-distribution topographies, the final evaluation phase subjects the networks to a strict stress test using two completely unseen reservoirs sourced from an external dataset. This phase systematically compares the extrapolation capabilities of both the Log-MSE and MAPE formulations to determine which loss function best adapts to unprecedented geometric scales.</p>
+<table>
+  <thead>
+    <tr>
+      <th rowspan="2">Unseen Reservoir</th>
+      <th colspan="2">Log-MSE Ensemble</th>
+      <th colspan="2">MAPE Ensemble</th>
+    </tr>
+    <tr>
+      <th>Average Error (hm³)</th>
+      <th>Average Error (%)</th>
+      <th>Average Error (hm³)</th>
+      <th>Average Error (%)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Escales</strong></td>
+      <td>57.05</td><td>53.38</td>
+      <td>46.11</td><td>42.93</td>
+    </tr>
+    <tr>
+      <td><strong>Terradets</strong></td>
+      <td>15.59</td><td>49.30</td>
+      <td>3.68</td><td>11.67</td>
+    </tr>
+  </tbody>
+</table>
+<p><u>Table 2</u>.
+Generalization and Out-of-Distribution Performance of the 9-Model Ensembles. This table evaluates the extrapolation capabilities of both the Log-MSE and MAPE ensembles when applied to completely unmonitored reservoirs (e.g., Escales and Terradets). Performance is measured using Mean Absolute Error (MAE) in physical volume (<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><msup><mi>m</mi><mn>3</mn></msup></mrow><annotation encoding="application/x-tex">hm^3</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord mathnormal">h</span><span class="mord"><span class="mord mathnormal">m</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span></span></span></span></span></span></span></span>) and Mean Absolute Percentage Error (MAPE). These results isolate the effect of the loss function on the ensemble's ability to generalize topographical relationships to novel basin geometries that were entirely absent from the training distribution.</p>
+<p>The results in Table 2 demonstrate the superior performance upon generalization of the MAPE Ensemble compared to the Log-MSE approach when applied to entirely unseen reservoirs. By optimizing for relative percentage error during the training phase, the MAPE architecture successfully learned to decouple 2D surface area signatures from absolute volumetric magnitudes, allowing it to adapt to novel topographies with significantly higher precision. While the Log-MSE model suffered from a persistent scale-dependent bias —resulting in relative errors hovering near 50% for both basins— the MAPE Ensemble achieved a substantial reduction in both absolute (<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><msup><mi>m</mi><mn>3</mn></msup></mrow><annotation encoding="application/x-tex">hm^3</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord mathnormal">h</span><span class="mord"><span class="mord mathnormal">m</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span></span></span></span></span></span></span></span>) and relative (%) error. This confirms that a scale-invariant loss function is a critical prerequisite for deep learning models tasked with monitoring hydrological systems across disparate geographic regions.</p>
+<p>The performance disparity is most pronounced in the Terradets reservoir, where the MAPE Ensemble achieved a remarkable 11.67% average error, effectively neutralizing the &quot;extrapolation trap&quot; that led the Log-MSE model to a much higher 49.30% error. In the case of Escales, although both models encountered greater predictive difficulty, the MAPE Ensemble still provided a 10.45% improvement in relative accuracy over its counterpart. These findings suggest that while absolute error naturally scales with reservoir size, the MAPE-trained architecture preserves a robust geometric understanding of the area-volume relationship, maintaining operational utility even when faced with topographies that deviate significantly from the training distribution.</p>
+<p><img src="file:///d:\Users\Eric\Desktop\BSE\Computational Learning and Deep Learning\reservoirs_capacity_nn\output\figs\predictions_escales.png" alt="Escales predictions">
+<u>Figure 1</u>.
+Temporal Volume Estimation for the Escales Reservoir (2020–2025). Comparison between ground-truth volume (red) and ensemble predictions. The Log-mse ensemble (green) consistently underpredicts the volume, while the MAPE ensemble (blue) captures the seasonal fluctuations with higher fidelity, albeit with a systematic negative bias. The solid lines represent the application of the Savitzky-Golay filter (<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>w</mi><mi>i</mi><mi>n</mi><mi>d</mi><mi>o</mi><mi>w</mi><mo>=</mo><mn>7</mn></mrow><annotation encoding="application/x-tex">window=7</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.02691em;">w</span><span class="mord mathnormal">in</span><span class="mord mathnormal">d</span><span class="mord mathnormal">o</span><span class="mord mathnormal" style="margin-right:0.02691em;">w</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">7</span></span></span></span>, <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mi>o</mi><mi>l</mi><mi>y</mi><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">poly=2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span><span class="mord mathnormal">o</span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">2</span></span></span></span>), effectively removing high-frequency noise from raw satellite observations.</p>
+<p><img src="file:///d:\Users\Eric\Desktop\BSE\Computational Learning and Deep Learning\reservoirs_capacity_nn\output\figs\predictions_terradets.png" alt="Terradets predictions">
+<u>Figure 2</u>.
+Temporal Volume Estimation for the Terradets Reservoir (2020–2025). Out-of-distribution validation results. The MAPE-trained ensemble (blue) demonstrates exceptional zero-shot transferability, converging on the true volume (<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>∼</mo><mn>31</mn><mtext> </mtext><mi>h</mi><msup><mi>m</mi><mn>3</mn></msup></mrow><annotation encoding="application/x-tex">\sim 31 \ hm^3</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.3669em;"></span><span class="mrel">∼</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord">31</span><span class="mspace"> </span><span class="mord mathnormal">h</span><span class="mord"><span class="mord mathnormal">m</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span></span></span></span></span></span></span></span>) with high accuracy after temporal smoothing. Conversely, the Log-mse model (green) suffers from a significant magnitude collapse, underpredicting the true volume by approximately 50%, highlighting the limitations of logarithmic compression for scale-varying basins.</p>
+<p>The temporal analysis displayed in Figures 1 and 2 reveals two critical findings regarding the model’s real-world utility. First, the raw predictions (dotted lines) from both architectures exhibit high volatility, characterized by sharp &quot;spikes&quot; that do not correspond to physical hydrological changes. These artifacts are attributed to atmospheric interference and varying sensor angles in the Sentinel-2 imagery. The integration of the Savitzky-Golay filter proves essential; it successfully isolates the underlying hydrological signal from the mathematical noise, producing a smoothed curve that tracks the seasonal filling and emptying cycles of the reservoirs without the lag associated with simple moving averages.</p>
+<p>Second, the results illustrate a clear performance-by-scale hierarchy. In the case of Terradets, which maintains a stable volume near 30 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><msup><mi>m</mi><mn>3</mn></msup></mrow><annotation encoding="application/x-tex">hm^3</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord mathnormal">h</span><span class="mord"><span class="mord mathnormal">m</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span></span></span></span></span></span></span></span>, the MAPE ensemble achieves nearly perfect alignment with the ground truth. This suggests that the 1/300 normalization used during training allowed the network to master this specific volumetric scale. In Escales, however, while the MAPE ensemble accurately reflects the timing and direction of every major volume shift, it displays a systematic underprediction bias. This &quot;scale-lag&quot; occurs because Escales often exceeds 120 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><msup><mi>m</mi><mn>3</mn></msup></mrow><annotation encoding="application/x-tex">hm^3</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord mathnormal">h</span><span class="mord"><span class="mord mathnormal">m</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span></span></span></span></span></span></span></span>, a range that is underrepresented in the training set. Despite this offset, the MAPE model significantly outperforms the Log-MSE model, which fails to track the trend or the magnitude, proving that the MAPE formulation is far more robust for cross-basin generalization.</p>
+<blockquote>
+<p>Please, refer to the notebooks <code>prediction_ensemble.ipynb</code> and <code>plots.ipynb</code> for the source code regarding the construction of the ensemble and posterior prediction, and the visualization, respectively.</p>
+</blockquote>
+<h2 id="conclusions">Conclusions</h2>
+<p>The motivation for this research is rooted in the urgent need for climate resilience; as global water management becomes increasingly complex, reliable data is the essential cornerstone for effective public policy. This project addressed this need by developing a Computer Vision framework to predict reservoir volumes using Sentinel-2 satellite imagery, offering a scalable solution for both &quot;data-poor&quot; environments lacking ground infrastructure and &quot;data-rich&quot; regions requiring independent redundancy. By successfully training an ensemble of CNNs to extract volumetric capacity from 2D spectral signatures, this work establishes a non-invasive fact-checking mechanism. Such an independent audit tool is of profound relevance today, serving as a safeguard for institutional transparency and a means to mitigate the growing citizen mistrust of public data through verifiable, remote-sensing evidence.</p>
+<p>Regarding the model's generalization, a transparent assessment reveals that while the MAPE Ensemble accurately tracks the timing and direction of hydrological cycles, it is not yet a reliable replacement for physical sensors. The generalization tests on the Escales and Terradets basins uncovered a persistent Scale-Bias, where the model accurately captured topographical physics but struggled to estimate the absolute magnitude of reservoirs larger than those in the training distribution. Despite this limitation, the system remains a powerful tool to complement official records from the Agència Catalana de l’Aigua (ACA). By providing a smoothed, satellite-based &quot;digital twin&quot; to official data, this framework proves that deep learning can provide the reliable, independent oversight necessary to inform policy and fortify hydrological resilience on a global scale.</p>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+            
+        </body>
+        </html>
